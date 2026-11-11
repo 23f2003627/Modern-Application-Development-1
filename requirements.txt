@@ -1,0 +1,8 @@
+Flask
+SQLAlchemy
+Flask-SQLAlchemy
+Flask-Doteny
+python-dotenv
+Werkzeug
+Flask-Migrate
+matplotlib
