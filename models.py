@@ -49,12 +49,7 @@ class User(BaseModel):
         nullable=False
     )
 
-    email = db.Column(
-        db.String(200),
-        nullable=False,
-        unique=True,
-        index=True
-    )
+    email = db.Column(db.String(200), nullable=False, unique=True, index=True)
 
     password_hash = db.Column(
         db.String(255),
@@ -91,11 +86,7 @@ class User(BaseModel):
     )
 
     # A student can have multiple bookings.
-    bookings = db.relationship(
-        "Booking",
-        back_populates="student",
-        foreign_keys="Booking.student_id"
-    )
+    bookings = db.relationship("Booking",back_populates="student",foreign_keys="Booking.student_id")
 
     # An examiner can create multiple examination slots.
     examination_slots = db.relationship(
