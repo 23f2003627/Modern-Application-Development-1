@@ -1,0 +1,141 @@
+{% for examination in examinations %}
+{% set permission = slot_permissions.get(examination.id) %}
+<div class="modal fade" id="manageExamination{{ examination.id }}" tabindex="-1"
+    aria-labelledby="manageExaminationLabel{{ examination.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-title fs-5" id="manageExaminationLabel{{ examination.id }}">
+                        {{ examination.name }} · Slots
+                    </h2>
+                    <div class="text-secondary small">
+                        {{ examination.course.course_code }} · {{ examination.course.course_name }} ·
+                        {{ examination.examination_type }}
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% if permission.can_create_slots %}
+                <section class="card border-0 bg-light mb-4">
+                    <div class="card-body">
+                        <h3 class="h6">Create examination slot</h3>
+                        <form method="post" action="{{ url_for('examiner.manage_slots', examination_id=examination.id) }}"
+                            class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label" for="new-date-{{ examination.id }}">Date</label>
+                                <input class="form-control" type="date" id="new-date-{{ examination.id }}"
+                                    name="date" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" for="new-start-{{ examination.id }}">Start time</label>
+                                <input class="form-control" type="time" id="new-start-{{ examination.id }}"
+                                    name="start_time" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" for="new-end-{{ examination.id }}">End time</label>
+                                <input class="form-control" type="time" id="new-end-{{ examination.id }}"
+                                    name="end_time" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label" for="new-capacity-{{ examination.id }}">Capacity</label>
+                                <input class="form-control" type="number" min="1"
+                                    id="new-capacity-{{ examination.id }}" name="maximum_capacity" required>
+                            </div>
+                            <div class="col-md-1 d-flex align-items-end">
+                                <button class="btn btn-primary w-100" type="submit" aria-label="Create slot">
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+                {% else %}
+                <div class="alert alert-info">
+                    Slots can be created only while the administrator-configured slot creation window is open.
+                </div>
+                {% endif %}
+
+                <h3 class="h6">Created slots</h3>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th><th>Time</th><th>Bookings</th><th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for slot in slots if slot.examination_id == examination.id %}
+                            <tr>
+                                <td>{{ slot.date.strftime("%d %b %Y") }}</td>
+                                <td>{{ slot.start_time.strftime("%I:%M %p") }} – {{ slot.end_time.strftime("%I:%M %p") }}</td>
+                                <td>{{ slot.booked_seats }} / {{ slot.maximum_capacity }}</td>
+                                <td><span class="badge text-bg-light border">{{ slot.status }}</span></td>
+                                <td class="text-end text-nowrap">
+                                    <button class="btn btn-sm btn-outline-primary" type="button"
+                                        data-bs-toggle="modal" data-bs-target="#slotStudents{{ slot.id }}"
+                                        data-bs-dismiss="modal">Students</button>
+                                    {% if permission.can_manage_slots and not slot.bookings %}
+                                    <form class="d-inline" method="post"
+                                        action="{{ url_for('examiner.delete_slot', slot_id=slot.id) }}">
+                                        <button class="btn btn-sm btn-outline-danger" type="submit">Remove</button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% if permission.can_manage_slots and not slot.bookings %}
+                            <tr>
+                                <td colspan="5">
+                                    <details>
+                                        <summary class="small text-primary">Edit slot</summary>
+                                        <form method="post" class="row g-2 mt-2"
+                                            action="{{ url_for('examiner.update_slot', slot_id=slot.id) }}">
+                                            <div class="col-md-3">
+                                                <label class="form-label" for="date{{ slot.id }}">Date</label>
+                                                <input class="form-control" type="date" id="date{{ slot.id }}"
+                                                    name="date" value="{{ slot.date.isoformat() }}" required>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label" for="start{{ slot.id }}">Start time</label>
+                                                <input class="form-control" type="time" id="start{{ slot.id }}"
+                                                    name="start_time" value="{{ slot.start_time.strftime('%H:%M') }}" required>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label" for="end{{ slot.id }}">End time</label>
+                                                <input class="form-control" type="time" id="end{{ slot.id }}"
+                                                    name="end_time" value="{{ slot.end_time.strftime('%H:%M') }}" required>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label" for="capacity{{ slot.id }}">Capacity</label>
+                                                <input class="form-control" type="number" min="1"
+                                                    id="capacity{{ slot.id }}" name="maximum_capacity"
+                                                    value="{{ slot.maximum_capacity }}" required>
+                                            </div>
+                                            <div class="col-md-1 d-flex align-items-end">
+                                                <button class="btn btn-primary w-100" type="submit">Save</button>
+                                            </div>
+                                        </form>
+                                    </details>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-secondary py-4">
+                                    No slots have been created for this examination.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" type="button" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}

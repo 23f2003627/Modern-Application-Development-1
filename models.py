@@ -33,7 +33,7 @@ class BaseModel(Timestamp,db.Model):
             db.Integer,
             primary_key=True
         )
-
+    
 
 
 
@@ -42,14 +42,19 @@ class User(BaseModel):
 
     __tablename__ = "users"
 
-
+    
 
     name = db.Column(
         db.String(100),
         nullable=False
     )
 
-    email = db.Column(db.String(200), nullable=False, unique=True, index=True)
+    email = db.Column(
+        db.String(200),
+        nullable=False,
+        unique=True,
+        index=True
+    )
 
     password_hash = db.Column(
         db.String(255),
@@ -76,7 +81,7 @@ class User(BaseModel):
     )
 
 
-
+ 
     # One User can have at most one ExaminerProfile.
     examiner_profile = db.relationship(
         "ExaminerProfile",
@@ -86,7 +91,11 @@ class User(BaseModel):
     )
 
     # A student can have multiple bookings.
-    bookings = db.relationship("Booking",back_populates="student",foreign_keys="Booking.student_id")
+    bookings = db.relationship(
+        "Booking",
+        back_populates="student",
+        foreign_keys="Booking.student_id"
+    )
 
     # An examiner can create multiple examination slots.
     examination_slots = db.relationship(
@@ -102,7 +111,7 @@ class User(BaseModel):
         foreign_keys="Evaluation.examiner_id"
     )
 
-
+ 
     __table_args__ = (
 
         db.CheckConstraint(
@@ -118,13 +127,13 @@ class User(BaseModel):
 
     )
 
-
+ 
     def set_password(self, password):
-
+ 
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
-
+ 
         return check_password_hash(
             self.password_hash,
             password
@@ -185,7 +194,7 @@ class ExaminerProfile(BaseModel):
 class Course(BaseModel):
 
     __tablename__ = "courses"
-
+ 
 
     course_code = db.Column(
         db.String(30),
@@ -283,13 +292,26 @@ class Examination(BaseModel):
         nullable=True
     )
 
+    slot_creation_open= db.Column(
+        db.Boolean,
+        nullable=False,
+        default=False)
+
+    
+    booking_open= db.Column(
+        db.Boolean,
+        nullable=False,
+        default=False)
+
+
+
     status = db.Column(
         db.String(30),
         nullable=False,
         default="Draft"
     )
 
-
+ 
 
     course = db.relationship(
         "Course",
@@ -354,10 +376,7 @@ class Examination(BaseModel):
 
 
 class ExaminationRubric(BaseModel):
-
     __tablename__ = "examination_rubrics"
-
-
 
     # Each rubric belongs to one examination.
     examination_id = db.Column(
@@ -370,7 +389,7 @@ class ExaminationRubric(BaseModel):
     criterion_name = db.Column(
         db.String(150),
         nullable=False
-    )
+                )
 
     maximum_marks = db.Column(
         db.Float,
@@ -393,39 +412,31 @@ class ExaminationRubric(BaseModel):
         back_populates="rubrics"
     )
 
-
     # Marks awarded for this criterion in different evaluations.
     evaluation_details = db.relationship(
         "EvaluationDetail",
-        back_populates="rubrics"
+        back_populates="rubric"  # Fixed from "rubrics" to "rubric"
     )
 
     __table_args__ = (
-
         db.CheckConstraint(
             "maximum_marks > 0",
             name="check_rubric_maximum_marks"
         ),
-
         db.CheckConstraint(
             "weightage >= 0 AND weightage <= 100",
             name="check_rubric_weightage"
         ),
-
     )
 
     def __repr__(self):
-        return (
-            f"<ExaminationRubric "
-            f"{self.criterion_name} - {self.maximum_marks}>"
-        )
-
+        return f"<ExaminationRubric {self.criterion_name} - {self.maximum_marks}>"
 
 
 class ExaminationSlot(BaseModel):
 
     __tablename__ = "examination_slots"
-
+ 
     examination_id = db.Column(
         db.Integer,
         db.ForeignKey("examinations.id"),
@@ -470,7 +481,7 @@ class ExaminationSlot(BaseModel):
         db.String(500),
         nullable=True
     )
-
+ 
 
 
     examination = db.relationship(
@@ -529,17 +540,14 @@ class ExaminationSlot(BaseModel):
         )
 
     def __repr__(self):
-        return (
-            f"<ExaminationSlot "
-            f"{self.id} - {self.date} {self.start_time}>"
-        )
+        return f"<ExaminationSlot {self.id} - {self.date} {self.start_time}>"
 
 
 
 class Booking(BaseModel):
 
     __tablename__ = "bookings"
-
+ 
 
     student_id = db.Column(
         db.Integer,
@@ -603,7 +611,7 @@ class Booking(BaseModel):
 class Evaluation(BaseModel):
 
     __tablename__ = "evaluations"
-
+   
     booking_id = db.Column(
         db.Integer,
         db.ForeignKey("bookings.id"),
@@ -612,7 +620,7 @@ class Evaluation(BaseModel):
 
     )
 
-
+   
     examiner_id = db.Column(
         db.Integer,
         db.ForeignKey("users.id"),
@@ -621,14 +629,14 @@ class Evaluation(BaseModel):
     total_marks = db.Column(
             db.Float,
             nullable=False,
-
+           
         )
-
+    
     remarks = db.Column(
             db.Text,
             nullable=True
         )
-
+    
     is_published = db.Column(
             db.Boolean,
             nullable=False,
@@ -654,6 +662,8 @@ class Evaluation(BaseModel):
     )   
 
 
+
+#updated Bug fix
 
 class EvaluationDetail(BaseModel):
     __tablename__ = "evaluation_details"
@@ -683,4 +693,6 @@ class EvaluationDetail(BaseModel):
 
     rubric = db.relationship(
         "ExaminationRubric",
-        back_populates="evaluation_details")
+        back_populates="evaluation_details"
+    )
+ 
