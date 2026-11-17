@@ -1,266 +1,34 @@
-{% extends "index.html" %}
+<ul class="nav nav-pills flex-column p-3" id="examiner-sidebar">
+    <li class="nav-item mb-2">
+        <button
+            class="nav-link {% if not search %}active{% endif %} text-white text-start w-100 d-flex align-items-center gap-2"
+            data-bs-toggle="pill" data-bs-target="#student-dashboard" type="button">
+            <i class="bi bi-speedometer2"></i>My Dashboard
+        </button>
+    </li>
+    <li class="nav-item mb-2">
+        <button class="nav-link text-white text-start w-100 d-flex align-items-center gap-2" data-bs-toggle="pill"
+            data-bs-target="#available-examinations" type="button">
+            <i class="bi bi-compass"></i> Examination
+        </button>
+    </li>
+    <li class="nav-item mb-2">
+        <button class="nav-link text-white text-start w-100 d-flex align-items-center gap-2" data-bs-toggle="pill"
+            data-bs-target="#schedule" type="button">
+            <i class="bi bi-book"></i>My Schedule
+        </button>
+    </li>
+    <li class="nav-item mb-2">
+        <button class="nav-link text-white text-start w-100 d-flex align-items-center gap-2" data-bs-toggle="pill"
+            data-bs-target="#results" type="button">
+            <i class="bi bi-book"></i>My Result
+        </button>
+    </li>
 
-{% block title %}Student Dashboard{% endblock %}
-
-{% block content %}
-<div class="container-fluid px-0">
-    <div class="row g-0">
-        <aside class="col-md-3 col-lg-2 bg-dark min-vh-100">
-            {% include "student/sidebar.html" %}
-        </aside>
-        <main class="col-md-9 col-lg-10 p-4 p-lg-5">
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-                <div>
-                    <p class="text-primary text-uppercase small fw-semibold mb-1">Student workspace</p>
-                    <h1 class="h2 mb-1">Welcome, {{ student.name }}</h1>
-                    <p class="text-secondary mb-0">Find examinations, manage bookings, and review published results.</p>
-                </div>
-                <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal"
-                    data-bs-target="#profileModal">
-                    <i class="bi bi-person-gear me-1"></i>Update profile
-                </button>
-            </div>
-
-            <div class="row g-3 mb-4">
-                <div class="col-sm-6 col-xl-4">
-                    <div class="card border-0 shadow-sm h-100"><div class="card-body">
-                        <div class="text-secondary small">Available examinations</div>
-                        <div class="fs-2 fw-semibold">{{ examinations|length }}</div>
-                    </div></div>
-                </div>
-                <div class="col-sm-6 col-xl-4">
-                    <div class="card border-0 shadow-sm h-100"><div class="card-body">
-                        <div class="text-secondary small">Upcoming examinations</div>
-                        <div class="fs-2 fw-semibold">{{ upcoming_bookings|length }}</div>
-                    </div></div>
-                </div>
-                <div class="col-sm-6 col-xl-4">
-                    <div class="card border-0 shadow-sm h-100"><div class="card-body">
-                        <div class="text-secondary small">Published results</div>
-                        <div class="fs-2 fw-semibold">{{ published_results|length }}</div>
-                    </div></div>
-                </div>
-            </div>
-
-            <section class="card border-0 shadow-sm mb-4" id="available-examinations">
-                <div class="card-header bg-white py-3">
-                    <h2 class="h5 mb-0">Available examinations</h2>
-                </div>
-                <div class="card-body border-bottom">
-                    <form method="get" action="{{ url_for('student.dashboard') }}" class="row g-2">
-                        <div class="col-lg-5">
-                            <label class="visually-hidden" for="exam-search">Search examinations</label>
-                            <input class="form-control" id="exam-search" type="search" name="q"
-                                value="{{ search }}" placeholder="Search examination or course">
-                        </div>
-                        <div class="col-md-5 col-lg-3">
-                            <label class="visually-hidden" for="course-filter">Course</label>
-                            <select class="form-select" id="course-filter" name="course_id">
-                                <option value="">All courses</option>
-                                {% for course in courses %}
-                                <option value="{{ course.id }}" {% if selected_course == course.id %}selected{% endif %}>
-                                    {{ course.course_code }} · {{ course.course_name }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-5 col-lg-2">
-                            <label class="visually-hidden" for="type-filter">Examination type</label>
-                            <select class="form-select" id="type-filter" name="type">
-                                <option value="">All types</option>
-                                {% for type in ["Viva", "Practical", "Project Demo", "Assessment"] %}
-                                <option value="{{ type }}" {% if selected_type == type %}selected{% endif %}>{{ type }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-2 d-grid">
-                            <button class="btn btn-primary" type="submit">Search</button>
-                        </div>
-                    </form>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr><th>Examination</th><th>Course</th><th>Type</th><th>Status</th><th class="text-end">Slots</th></tr>
-                        </thead>
-                        <tbody>
-                            {% for examination in examinations %}
-                            {% set exam_slots = slots_by_exam.get(examination.id, []) %}
-                            <tr>
-                                <td class="fw-semibold">{{ examination.name }}</td>
-                                <td>{{ examination.course.course_code }} · {{ examination.course.course_name }}</td>
-                                <td>{{ examination.examination_type }}</td>
-                                <td><span class="badge text-bg-light border">{{ examination.status }}</span></td>
-                                <td class="text-end">
-                                    <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="modal"
-                                        data-bs-target="#examSlots{{ examination.id }}">
-                                        View slots ({{ exam_slots|length }})
-                                    </button>
-                                </td>
-                            </tr>
-                            {% else %}
-                            <tr><td colspan="5" class="text-center text-secondary py-4">No examinations match your search.</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% for examination in examinations %}
-                {% set exam_slots = slots_by_exam.get(examination.id, []) %}
-                <div class="modal fade" id="examSlots{{ examination.id }}" tabindex="-1"
-                    aria-labelledby="examSlotsLabel{{ examination.id }}" aria-hidden="true">
-                    <div class="modal-dialog modal-lg modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <div>
-                                    <h2 class="modal-title fs-5" id="examSlotsLabel{{ examination.id }}">{{ examination.name }}</h2>
-                                    <div class="small text-secondary">{{ examination.course.course_code }} · {{ examination.examination_type }}</div>
-                                </div>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                {% if exam_slots %}
-                                <div class="table-responsive">
-                                    <table class="table align-middle mb-0">
-                                        <thead><tr><th>Date</th><th>Time</th><th>Seats</th><th>Booking</th></tr></thead>
-                                        <tbody>
-                                            {% for slot in exam_slots %}
-                                            <tr>
-                                                <td>{{ slot.date.strftime("%d %b %Y") }}</td>
-                                                <td>{{ slot.start_time.strftime("%I:%M %p") }} – {{ slot.end_time.strftime("%I:%M %p") }}</td>
-                                                <td>{{ slot.available_seats }} / {{ slot.maximum_capacity }}</td>
-                                                <td>
-                                                    {% if booking_open(examination) and slot.status == "Available" and slot.available_seats > 0 %}
-                                                    <form method="post" action="{{ url_for('student.book_slot', slot_id=slot.id) }}">
-                                                        <button class="btn btn-sm btn-primary" type="submit">Book slot</button>
-                                                    </form>
-                                                    {% elif slot.available_seats == 0 or slot.status == "Full" %}
-                                                    <span class="badge text-bg-secondary">Full</span>
-                                                    {% else %}
-                                                    <span class="badge text-bg-light border">Booking closed</span>
-                                                    {% endif %}
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {% else %}
-                                <p class="text-secondary mb-0">No examination slots are available yet.</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </section>
-
-            <section class="card border-0 shadow-sm mb-4" id="schedule">
-                <div class="card-header bg-white py-3"><h2 class="h5 mb-0">Upcoming examinations and schedule</h2></div>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light"><tr><th>Examination</th><th>Course</th><th>Date &amp; Time</th><th>Booking status</th><th>Action</th></tr></thead>
-                        <tbody>
-                            {% for booking in upcoming_bookings %}
-                            <tr>
-                                <td class="fw-semibold">{{ booking.slot.examination.name }}</td>
-                                <td>{{ booking.slot.examination.course.course_code }} · {{ booking.slot.examination.course.course_name }}</td>
-                                <td>{{ booking.slot.date.strftime("%d %b %Y") }}<br>
-                                    <span class="text-secondary small">{{ booking.slot.start_time.strftime("%I:%M %p") }} – {{ booking.slot.end_time.strftime("%I:%M %p") }}</span>
-                                </td>
-                                <td><span class="badge text-bg-success">{{ booking.status }}</span></td>
-                                <td>
-                                    {% if booking.slot.examination.slot_booking_end and now <= booking.slot.examination.slot_booking_end %}
-                                    <form method="post" action="{{ url_for('student.cancel_booking', booking_id=booking.id) }}">
-                                        <button class="btn btn-sm btn-outline-danger" type="submit">Cancel booking</button>
-                                    </form>
-                                    {% else %}<span class="text-secondary small">Cancellation closed</span>{% endif %}
-                                </td>
-                            </tr>
-                            {% else %}
-                            <tr><td colspan="5" class="text-center text-secondary py-4">You have no upcoming examinations.</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white py-3"><h2 class="h5 mb-0">Examination history</h2></div>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light"><tr><th>Examination</th><th>Date</th><th>Booking status</th></tr></thead>
-                        <tbody>
-                            {% for booking in history_bookings %}
-                            <tr>
-                                <td>{{ booking.slot.examination.name }}</td>
-                                <td>{{ booking.slot.date.strftime("%d %b %Y") }}</td>
-                                <td><span class="badge text-bg-light border">{{ booking.status }}</span></td>
-                            </tr>
-                            {% else %}
-                            <tr><td colspan="3" class="text-center text-secondary py-4">No examination history yet.</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section class="card border-0 shadow-sm" id="results">
-                <div class="card-header bg-white py-3"><h2 class="h5 mb-0">Published results and feedback</h2></div>
-                <div class="card-body">
-                    {% for booking in published_results %}
-                    <div class="{% if not loop.last %}border-bottom mb-3 pb-3{% endif %}">
-                        <div class="d-flex flex-wrap justify-content-between gap-2">
-                            <div>
-                                <h3 class="h6 mb-1">{{ booking.slot.examination.name }}</h3>
-                                <div class="small text-secondary">{{ booking.slot.date.strftime("%d %b %Y") }}</div>
-                            </div>
-                            <div class="fw-semibold">{{ "%.2f"|format(booking.evaluation.total_marks) }} / {{ "%.2f"|format(booking.slot.examination.maximum_marks) }}</div>
-                        </div>
-                        {% if booking.evaluation.remarks %}
-                        <p class="mb-2 mt-2">{{ booking.evaluation.remarks }}</p>
-                        {% endif %}
-                        {% if booking.evaluation.details %}
-                        <ul class="list-group list-group-flush">
-                            {% for detail in booking.evaluation.details %}
-                            <li class="list-group-item px-0 d-flex justify-content-between">
-                                <span>{{ detail.rubric.criterion_name }}</span>
-                                <span>{{ "%.2f"|format(detail.marks_awarded) }} / {{ "%.2f"|format(detail.rubric.maximum_marks) }}</span>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                        {% endif %}
-                    </div>
-                    {% else %}
-                    <p class="text-secondary mb-0">No examination results have been published yet.</p>
-                    {% endfor %}
-                </div>
-            </section>
-        </main>
-    </div>
-</div>
-
-<div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form method="post" action="{{ url_for('student.update_profile') }}">
-                <div class="modal-header">
-                    <h2 class="modal-title fs-5" id="profileModalLabel">Update student profile</h2>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <label class="form-label" for="profile-name">Name</label>
-                    <input class="form-control mb-3" id="profile-name" name="name" required value="{{ student.name }}">
-                    <label class="form-label" for="profile-email">Email</label>
-                    <input class="form-control mb-3" type="email" id="profile-email" name="email" required value="{{ student.email }}">
-                    <label class="form-label" for="profile-phone">Phone</label>
-                    <input class="form-control" id="profile-phone" name="phone" value="{{ student.phone or '' }}">
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-light" type="button" data-bs-dismiss="modal">Cancel</button>
-                    <button class="btn btn-primary" type="submit">Save profile</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-{% endblock %}
+    <li class="nav-item mt-3">
+        <a class="nav-link text-white text-start w-100 d-flex align-items-center gap-2"
+            href="{{ url_for('examiner.logout') }}">
+            <i class="bi bi-box-arrow-right"></i>Logout
+        </a>
+    </li>
+</ul>

@@ -1,0 +1,169 @@
+
+<section class="mb-4">
+    <h1 class="h3 mb-3">My schedule</h1>
+
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Upcoming examinations and schedule</h2>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Examination</th>
+                        <th>Course</th>
+                        <th>Date &amp; Time</th>
+                        <th>Booking status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for booking in upcoming_bookings %}
+                        <tr>
+                            <td>
+                                <strong>{{ booking.slot.examination.name }}</strong>
+                                <small class="d-block text-muted">Booking #{{ booking.id }}</small>
+                            </td>
+
+                            <td>
+                                {{ booking.slot.examination.course.course_code }} -
+                                {{ booking.slot.examination.course.course_name }}
+                            </td>
+
+                            <td>
+                                {{ booking.slot.date.strftime("%d %b %Y") }}
+                                <br>
+                                {{ booking.slot.start_time.strftime("%I:%M %p") }} -
+                                {{ booking.slot.end_time.strftime("%I:%M %p") }}
+                            </td>
+
+                            <td>
+                                <span class="badge text-bg-primary">
+                                    {{ booking.status }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {% if booking.status == "Booked" %}
+                                    <form method="POST" action="{{ url_for('student.cancel_booking', booking_id=booking.id) }}">
+                                        <button class="btn btn-sm btn-outline-danger" type="submit">
+                                            Cancel booking
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                You have no upcoming bookings.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h2 class="h5 mb-0">Booking history</h2>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Examination</th>
+                    <th>Course</th>
+                    <th>Date</th>
+                    <th>Booking status</th>
+                    <th>Completion details</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for booking in history_bookings %}
+                    <tr>
+                        <td>
+                            <strong>{{ booking.slot.examination.name }}</strong>
+                            <small class="d-block text-muted">
+                                Booking #{{ booking.id }}
+                            </small>
+                        </td>
+
+                        <td>
+                            {{ booking.slot.examination.course.course_code }} -
+                            {{ booking.slot.examination.course.course_name }}
+                        </td>
+
+                        <td>
+                            {{ booking.slot.date.strftime("%d %b %Y") }}
+                        </td>
+
+                        <td>
+                            {% if booking.status == "Completed" %}
+                                <span class="badge text-bg-success">
+                                    {{ booking.status }}
+                                </span>
+                            {% elif booking.status == "Cancelled" %}
+                                <span class="badge text-bg-secondary">
+                                    {{ booking.status }}
+                                </span>
+                            {% else %}
+                                <span class="badge text-bg-primary">
+                                    {{ booking.status }}
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if booking.status == "Completed" and booking.evaluation %}
+                                {% if booking.evaluation.is_published %}
+                                    <strong>
+                                        {{ booking.evaluation.total_marks }} /
+                                        {{ booking.slot.examination.maximum_marks }} marks
+                                    </strong>
+
+                                    <small class="d-block text-muted">
+                                        Evaluated {{ booking.evaluation.evaluated_at.strftime("%d %b %Y") }}
+                                    </small>
+
+                                    {% if booking.evaluation.remarks %}
+                                        <small class="d-block">
+                                            {{ booking.evaluation.remarks }}
+                                        </small>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">
+                                        Evaluation completed; results not yet published.
+                                    </span>
+                                {% endif %}
+
+                            {% elif booking.status == "Completed" %}
+                                <span class="text-muted">
+                                    Examination completed.
+                                </span>
+                            {% else %}
+                                <span class="text-muted">
+                                    No completion details.
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            No booking history yet.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>

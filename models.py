@@ -527,7 +527,7 @@ class ExaminationSlot(BaseModel):
         return sum(
             1
             for booking in self.bookings
-            if booking.status == "Booked"
+            if booking.status == ("Booked", "Completed")
         )
 
     @property

@@ -24,7 +24,7 @@ def logout():
 
 def _slot_creation_open(examination):
     now = datetime.now()
-    return (
+    return bool(
         examination.slot_creation_open
         and examination.slot_creation_start
         and examination.slot_creation_end
@@ -225,6 +225,11 @@ def create_slot(examination_id, current_user):
         )
         return redirect(url_for("examiner.dashboard"))
 
+    if not _slot_creation_open(examination):
+        flash("Slots can only be created during creation timeline")
+        return redirect(url_for("examiner.dashboard"))
+    
+
     slot = ExaminationSlot(
         examination_id=examination.id,
         examiner_id=current_user.id,
@@ -415,8 +420,31 @@ def evaluate_student(booking_id, current_user):
         for rubric_id, marks in marks_by_rubric.items()
     ]
 
-    db.session.commit()
+    booking.status = "Completed"
+    db.session.flush()
+
+    slot = booking.slot
+    completed = Booking.query.filter_by(
+        slot_id=slot.id, status="Completed"
+    ).count()
+    pending = Booking.query.filter_by(
+        slot_id=slot.id, status="Booked"
+    ).count()
+
+    if completed and not pending:
+        slot.status = "Completed"
+        examination = slot.examination
+
+        if (
+            examination.slots
+            and not examination.slot_creation_open
+            and not examination.booking_open
+            and all(
+                item.status in ("Completed", "Cancelled")
+                for item in examination.slots
+            )
+        ):
+            examination.status = "Completed"
 
     flash("Student evaluated successfully.", "success")
-
     return redirect(url_for("examiner.dashboard"))
