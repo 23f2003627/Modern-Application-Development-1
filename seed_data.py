@@ -1,31 +1,21 @@
-
+from datetime import datetime, timezone, date, time, timedelta
 from db import db
-from models import User
+from models import (
+    User,
+    ExaminerProfile,
+    Course,
+    Examination,
+    ExaminationRubric,
+    ExaminationSlot,
+    Booking,
+    Evaluation,
+    EvaluationDetail
+)
 
 
-def create_admin():
-    admin=User.query.filter_by(email="admin13@gmail.com").first()
-    if admin is None:
-        admin = User(
-            name="Exam Admin",
-            email="admin13@gmail.com",
-            role="Admin",
-            status="Approved",
-        )
 
-        admin.set_password("admin123")
-        db.session.add(admin) 
-        db.session.commit()
-        print("Admin Account Created")
-    else:    
-        print("Admin ALready Exist")
-
-    
  
 
-
-from db import db
-from datetime import datetime, timezone, date, time
 from models import (
     User,
     ExaminerProfile,
@@ -40,7 +30,7 @@ from models import (
 
 
 def create_admin():
-    admin=User.query.filter_by(email="admin13@gmail.com").first()
+    admin = User.query.filter_by(email="admin13@gmail.com").first()
     if admin is None:
         admin = User(
             name="Exam Admin",
@@ -48,271 +38,455 @@ def create_admin():
             role="Admin",
             status="Approved",
         )
-
         admin.set_password("admin123")
         db.session.add(admin) 
         db.session.commit()
         print("Admin Account Created")
     else:    
-        print("Admin ALready Exist")
-
-    
+        print("Admin Already Exists")
 
 def seed_data():
-    print("🌱 Starting database seeding...")
 
     try:
-        # 1. Create Users (Students and Examiners)
-        # Note: Admin can be created via your existing create_admin() function.
-        
-        users_data = [
-            # Examiners
+
+        # --------------------------------------------------
+        # 1. EXAMINERS
+        # --------------------------------------------------
+
+        examiners_data = [
             {
-                "name": "Dr. Alice Smith",
-                "email": "alice.smith@university.edu",
-                "role": "Examiner",
-                "status": "Approved",
+                "name": "Rahul Sharma",
+                "email": "rahul.examiner@example.com",
+                "password": "examiner123",
                 "phone": "9876543210",
-                "profile": {
-                    "department": "Computer Science",
-                    "designation": "Associate Professor",
-                    "employee_id": "EMP101",
-                    "qualification": "Ph.D. in Computer Science"
-                }
+                "department": "Computer Science",
+                "designation": "Assistant Professor",
+                "employee_id": "EMP001",
+                "qualification": "M.Tech Computer Science"
             },
             {
-                "name": "Prof. Bob Jones",
-                "email": "bob.jones@university.edu",
-                "role": "Examiner",
-                "status": "Approved",
+                "name": "Priya Verma",
+                "email": "priya.examiner@example.com",
+                "password": "examiner123",
                 "phone": "9876543211",
-                "profile": {
-                    "department": "Information Technology",
-                    "designation": "Professor",
-                    "employee_id": "EMP102",
-                    "qualification": "Ph.D. in Software Engineering"
-                }
-            },
-            # Students
-            {
-                "name": "John Doe",
-                "email": "john.doe@student.edu",
-                "role": "Student",
-                "status": "Approved",
-                "phone": "9123456789"
+                "department": "Data Science",
+                "designation": "Associate Professor",
+                "employee_id": "EMP002",
+                "qualification": "PhD Data Science"
             },
             {
-                "name": "Jane Eyre",
-                "email": "jane.eyre@student.edu",
-                "role": "Student",
-                "status": "Approved",
-                "phone": "9123456788"
-            },
-            {
-                "name": "Samwise Gamgee",
-                "email": "sam.gamgee@student.edu",
-                "role": "Student",
-                "status": "Approved",
-                "phone": "9123456787"
+                "name": "Amit Kumar",
+                "email": "amit.examiner@example.com",
+                "password": "examiner123",
+                "phone": "9876543212",
+                "department": "Artificial Intelligence",
+                "designation": "Assistant Professor",
+                "employee_id": "EMP003",
+                "qualification": "M.Tech Artificial Intelligence"
             }
         ]
 
-        created_users = {}
-        for u_data in users_data:
-            profile_data = u_data.pop("profile", None)
-            user = User.query.filter_by(email=u_data["email"]).first()
+        examiners = []
+
+        for data in examiners_data:
+
+            user = User.query.filter_by(email=data["email"]).first()
+
             if not user:
-                user = User(**u_data)
-                user.set_password("password123")
+
+                user = User(
+                    name=data["name"],
+                    email=data["email"],
+                    phone=data["phone"],
+                    role="Examiner",
+                    status="Approved"
+                )
+
+                user.set_password(data["password"])
+
                 db.session.add(user)
-                db.session.flush() # Flush to get user.id
+                db.session.flush()
 
-                if profile_data:
-                    profile = ExaminerProfile(user_id=user.id, **profile_data)
-                    db.session.add(profile)
+            profile = ExaminerProfile.query.filter_by(
+                user_id=user.id
+            ).first()
 
-            created_users[user.email] = user
+            if not profile:
 
-        # 2. Create Courses
+                profile = ExaminerProfile(
+                    user_id=user.id,
+                    department=data["department"],
+                    designation=data["designation"],
+                    employee_id=data["employee_id"],
+                    qualification=data["qualification"]
+                )
+
+                db.session.add(profile)
+
+            examiners.append(user)
+
+        db.session.flush()
+
+        # --------------------------------------------------
+        # 2. STUDENTS
+        # --------------------------------------------------
+
+        students_data = [
+            ("Aman Kumar", "aman.student@example.com", "9876500001"),
+            ("Rohit Singh", "rohit.student@example.com", "9876500002"),
+            ("Neha Gupta", "neha.student@example.com", "9876500003"),
+            ("Karan Mehta", "karan.student@example.com", "9876500004"),
+            ("Sneha Sharma", "sneha.student@example.com", "9876500005"),
+            ("Vikas Yadav", "vikas.student@example.com", "9876500006")
+        ]
+
+        students = []
+
+        for name, email, phone in students_data:
+
+            user = User.query.filter_by(email=email).first()
+
+            if not user:
+
+                user = User(
+                    name=name,
+                    email=email,
+                    phone=phone,
+                    role="Student",
+                    status="Approved"
+                )
+
+                user.set_password("student123")
+
+                db.session.add(user)
+                db.session.flush()
+
+            students.append(user)
+
+        # --------------------------------------------------
+        # 3. COURSES
+        # --------------------------------------------------
+
         courses_data = [
             {
                 "course_code": "CS101",
-                "course_name": "Introduction to Python Programming",
-                "description": "Fundamental concepts of programming using Python.",
-                "status": "Active"
+                "course_name": "Python Programming",
+                "description": "Fundamentals of Python programming."
             },
             {
-                "course_code": "IT202",
-                "course_name": "Database Management Systems",
-                "description": "Relational databases, SQL, and normalization.",
-                "status": "Active"
+                "course_code": "CS102",
+                "course_name": "Data Structures and Algorithms",
+                "description": "Study of fundamental data structures and algorithms."
+            },
+            {
+                "course_code": "DS101",
+                "course_name": "Data Science",
+                "description": "Introduction to data science and analytics."
+            },
+            {
+                "course_code": "AI101",
+                "course_name": "Artificial Intelligence",
+                "description": "Fundamentals of artificial intelligence and machine learning."
             }
         ]
 
-        created_courses = []
-        for c_data in courses_data:
-            course = Course.query.filter_by(course_code=c_data["course_code"]).first()
+        courses = {}
+
+        for data in courses_data:
+
+            course = Course.query.filter_by(
+                course_code=data["course_code"]
+            ).first()
+
             if not course:
-                course = Course(**c_data)
+
+                course = Course(
+                    course_code=data["course_code"],
+                    course_name=data["course_name"],
+                    description=data["description"],
+                    status="Active"
+                )
+
                 db.session.add(course)
                 db.session.flush()
-            created_courses.append(course)
 
-        # 3. Create Examinations
+            courses[data["course_code"]] = course
+
+        # --------------------------------------------------
+        # 4. EXAMINATIONS
+        # --------------------------------------------------
+
         examinations_data = [
             {
-                "course_id": created_courses[0].id,
-                "name": "CS101 Final Project Viva",
-                "examination_type": "Viva",
-                "duration_in_minutes": 30,
-                "maximum_marks": 50.0,
-                "status": "Booking Open"
+                "course": "CS101",
+                "name": "Python Programming Viva",
+                "type": "Viva",
+                "duration": 30,
+                "marks": 100
             },
             {
-                "course_id": created_courses[1].id,
-                "name": "IT202 Practical Assessment",
-                "examination_type": "Practical",
-                "duration_in_minutes": 45,
-                "maximum_marks": 100.0,
-                "status": "Booking Open"
+                "course": "CS102",
+                "name": "DSA Practical Examination",
+                "type": "Practical",
+                "duration": 60,
+                "marks": 100
+            },
+            {
+                "course": "DS101",
+                "name": "Data Science Project Demo",
+                "type": "Project Demo",
+                "duration": 45,
+                "marks": 100
+            },
+            {
+                "course": "AI101",
+                "name": "AI Assessment",
+                "type": "Assessment",
+                "duration": 30,
+                "marks": 100
             }
         ]
 
-        created_exams = []
-        for e_data in examinations_data:
-            # Check if exam exists by name & course
-            exam = Examination.query.filter_by(name=e_data["name"]).first()
-            if not exam:
-                exam = Examination(**e_data)
-                db.session.add(exam)
-                db.session.flush()
-            created_exams.append(exam)
+        examinations = []
 
-        # 4. Create Examination Rubrics
-        rubrics_data = [
-            # Rubrics for Exam 1 (Viva - Total weightage 100%)
-            {"examination_id": created_exams[0].id, "criterion_name": "Code Quality", "maximum_marks": 25.0, "weightage": 50.0, "description": "Clean and readable code."},
-            {"explanation_id": created_exams[0].id, "criterion_name": "Explanation & Logic", "maximum_marks": 25.0, "weightage": 50.0, "description": "Ability to explain implementation."},
-            
-            # Rubrics for Exam 2 (Practical - Total weightage 100%)
-            {"examination_id": created_exams[1].id, "criterion_name": "Query Optimization", "maximum_marks": 50.0, "weightage": 50.0, "description": "Efficiency of SQL queries."},
-            {"explanation_id": created_exams[1].id, "criterion_name": "Schema Design", "maximum_marks": 50.0, "weightage": 50.0, "description": "Normalization and constraints adherence."}
-        ]
+        for index, data in enumerate(examinations_data):
 
-        created_rubrics = []
-        for r_data in rubrics_data:
-            # Clean up key name typo if any
-            r_data.pop("explanation_id", None)
-            rubric = ExaminationRubric.query.filter_by(
-                examination_id=r_data["examination_id"], 
-                criterion_name=r_data["criterion_name"]
+            examination = Examination.query.filter_by(
+                course_id=courses[data["course"]].id,
+                name=data["name"]
             ).first()
-            if not rubric:
-                rubric = ExaminationRubric(**r_data)
-                db.session.add(rubric)
-                db.session.flush()
-            created_rubrics.append(rubric)
 
-        # 5. Create Examination Slots
-        slots_data = [
-            {
-                "examination_id": created_exams[0].id,
-                "examiner_id": created_users["alice.smith@university.edu"].id,
-                "date": date(2026, 11, 10),
-                "start_time": time(10, 0),
-                "end_time": time(10, 30),
-                "maximum_capacity": 1,
-                "status": "Available",
-                "meeting_link": "https://meet.google.com/abc-defg-hij"
-            },
-            {
-                "examination_id": created_exams[1].id,
-                "examiner_id": created_users["bob.jones@university.edu"].id,
-                "date": date(2026, 11, 11),
-                "start_time": time(14, 0),
-                "end_time": time(14, 45),
-                "maximum_capacity": 2,
-                "status": "Available",
-                "meeting_link": "https://zoom.us/j/1234567890"
-            }
+            if not examination:
+
+                today = datetime.now(timezone.utc)
+
+                examination = Examination(
+                    course_id=courses[data["course"]].id,
+                    name=data["name"],
+                    examination_type=data["type"],
+                    duration_in_minutes=data["duration"],
+                    maximum_marks=data["marks"],
+
+                    slot_creation_start=today - timedelta(days=2),
+                    slot_creation_end=today + timedelta(days=10),
+
+                    slot_booking_start=today - timedelta(days=1),
+                    slot_booking_end=today + timedelta(days=15),
+
+                    slot_creation_open=True,
+                    booking_open=True,
+                    status="Booking Open"
+                )
+
+                db.session.add(examination)
+                db.session.flush()
+
+            examinations.append(examination)
+
+        # --------------------------------------------------
+        # 5. EXAMINATION RUBRICS
+        # --------------------------------------------------
+
+        rubric_data = [
+            [
+                ("Conceptual Knowledge", 30, 30),
+                ("Technical Knowledge", 30, 30),
+                ("Communication", 20, 20),
+                ("Problem Solving", 20, 20)
+            ],
+            [
+                ("Algorithm Design", 30, 30),
+                ("Code Implementation", 30, 30),
+                ("Time Complexity", 20, 20),
+                ("Problem Solving", 20, 20)
+            ],
+            [
+                ("Project Understanding", 25, 25),
+                ("Implementation", 30, 30),
+                ("Presentation", 25, 25),
+                ("Innovation", 20, 20)
+            ],
+            [
+                ("AI Concepts", 30, 30),
+                ("Technical Implementation", 30, 30),
+                ("Problem Solving", 20, 20),
+                ("Explanation", 20, 20)
+            ]
         ]
 
-        created_slots = []
-        for s_data in slots_data:
-            slot = ExaminationSlot.query.filter_by(
-                examination_id=s_data["examination_id"],
-                examiner_id=s_data["examiner_id"],
-                date=s_data["date"],
-                start_time=s_data["start_time"]
+        for examination, rubrics in zip(examinations, rubric_data):
+
+            existing = ExaminationRubric.query.filter_by(
+                examination_id=examination.id
             ).first()
-            if not slot:
-                slot = ExaminationSlot(**s_data)
-                db.session.add(slot)
-                db.session.flush()
-            created_slots.append(slot)
 
-        # 6. Create Bookings
-        bookings_data = [
-            {
-                "student_id": created_users["john.doe@student.edu"].id,
-                "slot_id": created_slots[0].id,
-                "status": "Booked"
-            },
-            {
-                "student_id": created_users["jane.eyre@student.edu"].id,
-                "slot_id": created_slots[1].id,
-                "status": "Booked"
-            }
-        ]
+            if not existing:
 
-        created_bookings = []
-        for b_data in bookings_data:
+                for name, marks, weightage in rubrics:
+
+                    db.session.add(
+                        ExaminationRubric(
+                            examination_id=examination.id,
+                            criterion_name=name,
+                            maximum_marks=marks,
+                            weightage=weightage,
+                            description=f"Evaluation of {name.lower()}."
+                        )
+                    )
+
+        db.session.flush()
+
+        # --------------------------------------------------
+        # 6. EXAMINATION SLOTS
+        # --------------------------------------------------
+
+        slots = []
+
+        today = date.today()
+
+        for index, examination in enumerate(examinations):
+
+            examiner = examiners[index % len(examiners)]
+
+            for day_offset in range(1, 4):
+
+                slot_date = today + timedelta(days=day_offset)
+
+                start = time(10 + day_offset, 0)
+                end = time(11 + day_offset, 0)
+
+                slot = ExaminationSlot.query.filter_by(
+                    examination_id=examination.id,
+                    examiner_id=examiner.id,
+                    date=slot_date,
+                    start_time=start
+                ).first()
+
+                if not slot:
+
+                    slot = ExaminationSlot(
+                        examination_id=examination.id,
+                        examiner_id=examiner.id,
+                        date=slot_date,
+                        start_time=start,
+                        end_time=end,
+                        maximum_capacity=5,
+                        status="Available",
+                        meeting_link="https://meet.google.com/example"
+                    )
+
+                    db.session.add(slot)
+                    db.session.flush()
+
+                slots.append(slot)
+
+       
+        # 7. BOOKINGS
+       
+
+        bookings = []
+
+        for index, student in enumerate(students):
+
+            slot = slots[index % len(slots)]
+
             booking = Booking.query.filter_by(
-                student_id=b_data["student_id"],
-                slot_id=b_data["slot_id"]
+                student_id=student.id,
+                slot_id=slot.id
             ).first()
+
             if not booking:
-                booking = Booking(**b_data)
+
+                booking = Booking(
+                    student_id=student.id,
+                    slot_id=slot.id,
+                    status="Booked"
+                )
+
                 db.session.add(booking)
                 db.session.flush()
-            created_bookings.append(booking)
 
-        # 7. Create Evaluations & Evaluation Details (for the first booking as an example)
-        eval_exists = Evaluation.query.filter_by(booking_id=created_bookings[0].id).first()
-        if not eval_exists:
+            bookings.append(booking)
+
+        # 8. EVALUATIONS
+       
+
+        for index, booking in enumerate(bookings):
+
+            # Keep the last two bookings unevaluated.
+            if index >= len(bookings) - 2:
+                continue
+
+            if booking.evaluation:
+                continue
+
+            slot = booking.slot
+
             evaluation = Evaluation(
-                booking_id=created_bookings[0].id,
-                examiner_id=created_users["alice.smith@university.edu"].id,
-                total_marks=45.0,
-                remarks="Excellent understanding of core concepts and clean code structure.",
-                is_published=True,
-                evaluated_at=datetime.now(timezone.utc)
+                booking_id=booking.id,
+                examiner_id=slot.examiner_id,
+                total_marks=0,
+                remarks="Good performance.",
+                is_published=True
             )
+
             db.session.add(evaluation)
             db.session.flush()
 
-            # Add evaluation details for the rubrics linked to exam 0
-            exam_0_rubrics = [r for r in created_rubrics if r.examination_id == created_exams[0].id]
-            
-            detail_1 = EvaluationDetail(
-                evaluation_id=evaluation.id,
-                rubric_id=exam_0_rubrics[0].id,
-                marks_awarded=23.0
-            )
-            detail_2 = EvaluationDetail(
-                evaluation_id=evaluation.id,
-                rubric_id=exam_0_rubrics[1].id,
-                marks_awarded=22.0
-            )
-            db.session.add_all([detail_1, detail_2])
+            # 9. EVALUATION DETAILS
+            # --------------------------------------------------
+
+            rubrics = ExaminationRubric.query.filter_by(
+                examination_id=slot.examination_id
+            ).all()
+
+            total_marks = 0
+
+            for rubric_index, rubric in enumerate(rubrics):
+
+                awarded = round(
+                    rubric.maximum_marks * (0.75 + (index % 3) * 0.05),
+                    2
+                )
+
+                awarded = min(awarded, rubric.maximum_marks)
+
+                total_marks += awarded
+
+                detail = EvaluationDetail(
+                    evaluation_id=evaluation.id,
+                    rubric_id=rubric.id,
+                    marks_awarded=awarded
+                )
+
+                db.session.add(detail)
+
+            evaluation.total_marks = total_marks
+
+            booking.status = "Completed"
+
+        # COMMIT
+      
 
         db.session.commit()
-        print("✅ Database seeding completed successfully!")
+
+        print("\n===================================")
+        print("SEED DATA CREATED SUCCESSFULLY!")
+        print("===================================")
+        print(f"Examiners: {len(examiners)}")
+        print(f"Students: {len(students)}")
+        print(f"Courses: {len(courses)}")
+        print(f"Examinations: {len(examinations)}")
+        print(f"Slots: {len(slots)}")
+        print(f"Bookings: {len(bookings)}")
+        print(f"===================================\n")
 
     except Exception as e:
+
         db.session.rollback()
-        print(f"❌ Error during database seeding: {e}")
-        raise e
 
-    
+        print("Error while seeding data:", e)
 
+        raise
+
+ 

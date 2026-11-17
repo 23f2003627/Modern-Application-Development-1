@@ -1,70 +1,73 @@
 {% for slot in slots %}
-<div class="modal fade" id="slotStudents{{ slot.id }}" tabindex="-1"
-    aria-labelledby="slotStudentsLabel{{ slot.id }}" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+
+<div class="modal fade" id="slotStudents{{ slot.id }}" tabindex="-1">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
+
             <div class="modal-header">
-                <div>
-                    <h2 class="modal-title fs-5" id="slotStudentsLabel{{ slot.id }}">Booked students</h2>
-                    <div class="text-secondary small">
-                        {{ slot.examination.name }} · {{ slot.date.strftime("%d %b %Y") }} ·
-                        {{ slot.start_time.strftime("%I:%M %p") }} – {{ slot.end_time.strftime("%I:%M %p") }}
-                    </div>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Booked Students</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
+
             <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
+
+                <h6>{{ slot.examination.name }}</h6>
+                <p>{{ slot.date }} | {{ slot.start_time }} - {{ slot.end_time }}</p>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Evaluation</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for booking in slot.bookings if booking.status == "Booked" %}
+
                             <tr>
-                                <th>Student</th><th>Email</th><th>Booking status</th>
-                                <th>Evaluation</th><th>Evaluate</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for booking in slot.bookings if booking.status == "Booked" %}
-                            <tr>
-                                <td class="fw-semibold">{{ booking.student.name }}</td>
+                                <td>{{ booking.student.name }}</td>
                                 <td>{{ booking.student.email }}</td>
-                                <td><span class="badge text-bg-success">{{ booking.status }}</span></td>
+                                <td>{{ booking.status }}</td>
+
                                 <td>
                                     {% if booking.evaluation %}
-                                    <span class="badge text-bg-primary">
-                                        Submitted · {{ "%.2f"|format(booking.evaluation.total_marks) }}
-                                    </span>
+                                        Completed
                                     {% else %}
-                                    <span class="badge text-bg-warning">Pending</span>
+                                        Pending
                                     {% endif %}
                                 </td>
+
                                 <td>
-                                    <details>
-                                        <summary class="btn btn-sm {{ 'btn-outline-primary' if booking.evaluation else 'btn-primary' }}">
-                                            {{ "Update evaluation" if booking.evaluation else "Evaluate" }}
-                                        </summary>
-                                        <div class="pt-3">
-                                            {% with examination=slot.examination, rubrics=rubrics_by_examination.get(slot.examination_id, []) %}
-                                                {% include "examiner/evaluate.html" %}
-                                            {% endwith %}
-                                        </div>
-                                    </details>
+                                    {% with booking=booking, examination=slot.examination %}
+                                        {% include "examiner/evaluate.html" %}
+                                    {% endwith %}
                                 </td>
                             </tr>
-                            {% else %}
+
+                        {% else %}
                             <tr>
-                                <td colspan="5" class="text-center text-secondary py-4">
-                                    No students are booked in this slot.
+                                <td colspan="5" class="text-center text-muted">
+                                    No booked students for this slot.
                                 </td>
                             </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
             </div>
+
             <div class="modal-footer">
-                <button class="btn btn-light" type="button" data-bs-dismiss="modal">Close</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">
+                    Close
+                </button>
             </div>
+
         </div>
     </div>
 </div>
+
 {% endfor %}

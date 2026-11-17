@@ -522,7 +522,7 @@ class ExaminationSlot(BaseModel):
 
     @property
     def booked_seats(self):
-        """Count active bookings for this slot."""
+       
 
         return sum(
             1
