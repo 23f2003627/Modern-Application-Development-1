@@ -1,56 +1,67 @@
-<ul class="nav nav-pills flex-column p-3" id="admin-sidebar">
-    <li class="nav-item mb-2">
-        <button class="nav-link {% if not search %}active{% endif %} text-white text-start w-100 d-flex align-items-center gap-2"
-            data-bs-toggle="pill" data-bs-target="#dashboard" type="button">
-            <i class="bi bi-speedometer2"></i>Dashboard
-        </button>
-    </li>
-    <li class="nav-item mb-2">
-        <button class="nav-link text-white text-start w-100 d-flex align-items-center gap-2"
-            data-bs-toggle="pill" data-bs-target="#examination" type="button">
-            <i class="bi bi-compass"></i>Examination
-        </button>
-    </li>
-    <li class="nav-item mb-2">
-        <button class="nav-link text-white text-start w-100 d-flex align-items-center gap-2"
-            data-bs-toggle="pill" data-bs-target="#courses" type="button">
-            <i class="bi bi-book"></i>Courses
-        </button>
-    </li>
-    <li class="nav-item mb-2">
-        <button class="nav-link text-white text-start w-100 d-flex align-items-center gap-2"
-            data-bs-toggle="pill" data-bs-target="#examiners" type="button">
-            <i class="bi bi-person-badge"></i>Examiners
-        </button>
-    </li>
-    <li class="nav-item mb-2">
-        <button class="nav-link text-white text-start w-100 d-flex align-items-center gap-2"
-            data-bs-toggle="pill" data-bs-target="#students" type="button">
-            <i class="bi bi-people"></i>Students
-        </button>
-    </li>
-    <li class="nav-item mb-2">
-        <button class="nav-link text-white text-start w-100 d-flex align-items-center gap-2"
-            data-bs-toggle="pill" data-bs-target="#bookings" type="button">
-            <i class="bi bi-calendar-check"></i>Bookings
-        </button>
-    </li>
-    <li class="nav-item mb-2">
-        <button class="nav-link {% if search %}active{% endif %} text-white text-start w-100 d-flex align-items-center gap-2"
-            data-bs-toggle="pill" data-bs-target="#search" type="button">
-            <i class="bi bi-search"></i>Search
-        </button>
-    </li>
-    <li class="nav-item mb-2">
-        <button class="nav-link text-white text-start w-100 d-flex align-items-center gap-2"
-            data-bs-toggle="pill" data-bs-target="#history" type="button">
-            <i class="bi bi-clock-history"></i>History
-        </button>
-    </li>
-    <li class="nav-item mt-3">
-        <a class="nav-link text-white text-start w-100 d-flex align-items-center gap-2"
+<div class="d-flex flex-column h-100">
+   
+    <div class="p-3 border-bottom border-secondary mb-2">
+        <h5 class="text-white fw-bold mb-0 fs-6">ExamPortal Admin</h5>
+        <small class="text-white-50" style="font-size: 0.75rem;">Management System</small>
+    </div>
+
+    
+    <ul class="nav nav-pills flex-column px-3 pb-3 mb-auto" id="admin-sidebar">
+        <li class="nav-item mb-2">
+            <button class="nav-link {% if not search %}active{% endif %} text-white text-start w-100 d-flex align-items-center gap-2 py-2 rounded-2"
+                data-bs-toggle="pill" data-bs-target="#dashboard" type="button">
+                <i class="bi bi-speedometer2"></i>Dashboard
+            </button>
+        </li>
+        <li class="nav-item mb-2">
+            <button class="nav-link text-white text-start w-100 d-flex align-items-center gap-2 py-2 rounded-2"
+                data-bs-toggle="pill" data-bs-target="#examination" type="button">
+                <i class="bi bi-compass"></i>Examination
+            </button>
+        </li>
+        <li class="nav-item mb-2">
+            <button class="nav-link text-white text-start w-100 d-flex align-items-center gap-2 py-2 rounded-2"
+                data-bs-toggle="pill" data-bs-target="#courses" type="button">
+                <i class="bi bi-book"></i>Courses
+            </button>
+        </li>
+        <li class="nav-item mb-2">
+            <button class="nav-link text-white text-start w-100 d-flex align-items-center gap-2 py-2 rounded-2"
+                data-bs-toggle="pill" data-bs-target="#examiners" type="button">
+                <i class="bi bi-person-badge"></i>Examiners
+            </button>
+        </li>
+        <li class="nav-item mb-2">
+            <button class="nav-link text-white text-start w-100 d-flex align-items-center gap-2 py-2 rounded-2"
+                data-bs-toggle="pill" data-bs-target="#students" type="button">
+                <i class="bi bi-people"></i>Students
+            </button>
+        </li>
+        <li class="nav-item mb-2">
+            <button class="nav-link text-white text-start w-100 d-flex align-items-center gap-2 py-2 rounded-2"
+                data-bs-toggle="pill" data-bs-target="#bookings" type="button">
+                <i class="bi bi-calendar-check"></i>Bookings
+            </button>
+        </li>
+        <li class="nav-item mb-2">
+            <button class="nav-link {% if search %}active{% endif %} text-white text-start w-100 d-flex align-items-center gap-2 py-2 rounded-2"
+                data-bs-toggle="pill" data-bs-target="#search" type="button">
+                <i class="bi bi-search"></i>Search
+            </button>
+        </li>
+        <li class="nav-item mb-2">
+            <button class="nav-link text-white text-start w-100 d-flex align-items-center gap-2 py-2 rounded-2"
+                data-bs-toggle="pill" data-bs-target="#history" type="button">
+                <i class="bi bi-clock-history"></i>History
+            </button>
+        </li>
+    </ul>
+
+    
+    <div class="p-3 border-top border-secondary mt-auto">
+        <a class="nav-link text-danger text-start w-100 d-flex align-items-center gap-2 py-2 rounded-2 bg-danger bg-opacity-10"
             href="{{ url_for('admin.logout') }}">
             <i class="bi bi-box-arrow-right"></i>Logout
         </a>
-    </li>
-</ul>
+    </div>
+</div>

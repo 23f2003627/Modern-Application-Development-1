@@ -62,7 +62,7 @@ def dashboard(current_user):
         )
     if  examination_type:
         examinations_query=examinations_query.filter(
-            Examination.examination_type  ==course_id
+            Examination.examination_type  == examination_type
         )
 
 
@@ -226,7 +226,7 @@ def book_slot(slot_id, current_user):
     examination=slot.examination
 
     # is booking open 
-    if _booking_open(examination):
+    if not _booking_open(examination):
         flash("Booking is not open for this examination","warning")
         return redirect(url_for("student.dashboard"))
 
@@ -243,7 +243,7 @@ def book_slot(slot_id, current_user):
         Booking.query.join(ExaminationSlot).filter(
             Booking.student_id == current_user.id,
             Booking.status=="Booking",
-            ExaminationSlot.examination_id==ExaminationSlot
+            ExaminationSlot.examination_id== examination.id
         ).first()
     )
 
@@ -263,9 +263,11 @@ def book_slot(slot_id, current_user):
     db.session.add(booking)
     db.session.flush()
 
+
+    slot.available_seats -= 1
+
     if slot.available_seats == 0:
         slot.status="Full"
-
 
 
     db.session.commit()

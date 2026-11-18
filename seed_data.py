@@ -49,9 +49,9 @@ def seed_data():
 
     try:
 
-        # --------------------------------------------------
-        # 1. EXAMINERS
-        # --------------------------------------------------
+      
+        # 1.EXAMINERS
+        
 
         examiners_data = [
             {
@@ -127,9 +127,9 @@ def seed_data():
 
         db.session.flush()
 
-        # --------------------------------------------------
+       
         # 2. STUDENTS
-        # --------------------------------------------------
+       
 
         students_data = [
             ("Aman Kumar", "aman.student@example.com", "9876500001"),
@@ -163,9 +163,9 @@ def seed_data():
 
             students.append(user)
 
-        # --------------------------------------------------
+        
         # 3. COURSES
-        # --------------------------------------------------
+        
 
         courses_data = [
             {
@@ -212,9 +212,9 @@ def seed_data():
 
             courses[data["course_code"]] = course
 
-        # --------------------------------------------------
+        
         # 4. EXAMINATIONS
-        # --------------------------------------------------
+       
 
         examinations_data = [
             {
@@ -283,9 +283,9 @@ def seed_data():
 
             examinations.append(examination)
 
-        # --------------------------------------------------
+        
         # 5. EXAMINATION RUBRICS
-        # --------------------------------------------------
+       
 
         rubric_data = [
             [
@@ -336,9 +336,9 @@ def seed_data():
 
         db.session.flush()
 
-        # --------------------------------------------------
+        
         # 6. EXAMINATION SLOTS
-        # --------------------------------------------------
+       
 
         slots = []
 
@@ -434,7 +434,7 @@ def seed_data():
             db.session.flush()
 
             # 9. EVALUATION DETAILS
-            # --------------------------------------------------
+            
 
             rubrics = ExaminationRubric.query.filter_by(
                 examination_id=slot.examination_id
