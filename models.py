@@ -663,7 +663,6 @@ class Evaluation(BaseModel):
 
 
 
-#updated Bug fix
 
 class EvaluationDetail(BaseModel):
     __tablename__ = "evaluation_details"
