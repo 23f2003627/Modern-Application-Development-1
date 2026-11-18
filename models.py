@@ -61,13 +61,13 @@ class User(BaseModel):
         nullable=False
     )
 
-    # Allowed roles: Admin, Examiner, Student.
+    
     role = db.Column(
         db.String(20),
         nullable=False
     )
 
-    # Account approval and activation status.
+    
     status = db.Column(
         db.String(20),
         nullable=False,
@@ -82,7 +82,7 @@ class User(BaseModel):
 
 
  
-    # One User can have at most one ExaminerProfile.
+    
     examiner_profile = db.relationship(
         "ExaminerProfile",
         back_populates ="user",
@@ -90,21 +90,21 @@ class User(BaseModel):
         cascade="all, delete-orphan"
     )
 
-    # A student can have multiple bookings.
+    
     bookings = db.relationship(
         "Booking",
         back_populates="student",
         foreign_keys="Booking.student_id"
     )
 
-    # An examiner can create multiple examination slots.
+    
     examination_slots = db.relationship(
         "ExaminationSlot",
         back_populates="examiner",
         foreign_keys="ExaminationSlot.examiner_id"
     )
 
-    # Evaluations submitted by this user as an examiner.
+    
     evaluations = db.relationship(
         "Evaluation",
         back_populates="examiner",
@@ -378,7 +378,7 @@ class Examination(BaseModel):
 class ExaminationRubric(BaseModel):
     __tablename__ = "examination_rubrics"
 
-    # Each rubric belongs to one examination.
+    
     examination_id = db.Column(
         db.Integer,
         db.ForeignKey("examinations.id", ondelete="CASCADE"),
@@ -396,7 +396,7 @@ class ExaminationRubric(BaseModel):
         nullable=False
     )
 
-    # Percentage weight assigned to this criterion.
+    
     weightage = db.Column(
         db.Float,
         nullable=False
@@ -412,10 +412,10 @@ class ExaminationRubric(BaseModel):
         back_populates="rubrics"
     )
 
-    # Marks awarded for this criterion in different evaluations.
+    
     evaluation_details = db.relationship(
         "EvaluationDetail",
-        back_populates="rubric"  # Fixed from "rubrics" to "rubric"
+        back_populates="rubric"  
     )
 
     __table_args__ = (
@@ -663,7 +663,7 @@ class Evaluation(BaseModel):
 
 
 
-#updated Bug fix
+
 
 class EvaluationDetail(BaseModel):
     __tablename__ = "evaluation_details"
