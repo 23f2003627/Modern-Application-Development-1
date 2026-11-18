@@ -12,15 +12,18 @@ auth_bp= Blueprint(
 @auth_bp.route("/login",methods=["GET","POST"])
 def login():
     if request.method=="POST":
-        data=request.form
-        email= data.get("email")
-        password= data.get("password")
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
 
         user=User.query.filter_by(email=email).first()
 
-        if user and user.check_password(password):
-            if user.status != "Approved":
-                return redirect(url_for("auth.login"))
+        if user is None or not user.check_password(password):
+            flash("Invalid email or password.", "danger")
+            return redirect(url_for("auth.login"))
+
+        if user.status != "Approved":
+            flash("Your account is not approved yet.", "warning")
+            return redirect(url_for("auth.login"))
 
         session["user_id"]=user.id
         session["role"]=user.role
